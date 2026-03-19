@@ -22,4 +22,5 @@ czertainly ALL = NOPASSWD: /usr/bin/rm /root/install/czertainly-values.yaml
 czertainly ALL = NOPASSWD: /usr/bin/rm /root/install/czertainly-values.local.yaml
 czertainly ALL = NOPASSWD: /usr/bin/apt update
 czertainly ALL = NOPASSWD: /usr/bin/apt upgrade
+czertainly ALL = NOPASSWD: /usr/bin/ilm-update-hostname
 czertainly ALL = NOPASSWD: /usr/bin/czertainly-update-hostname

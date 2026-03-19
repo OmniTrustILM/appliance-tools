@@ -2,9 +2,10 @@
 *.deb
 debian/.debhelper
 debian/czertainly-appliance-tools/*
-debian/czertainly-appliance-tools.substvars
+debian/ilm-appliance-tools/*
 debian/debhelper-build-stamp
-debian/czertainly-appliance-tools.debhelper.log
+debian/czertainly-appliance-tools.*
+debian/ilm-appliance-tools.*
 debian/files
 debian/install
 debian/copyright

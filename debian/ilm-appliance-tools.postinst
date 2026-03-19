@@ -36,5 +36,16 @@ if [ -f "$REPO_FILE" ]; then
 fi
 
 
+# Transition: ensure /etc/appliance_version is the canonical file and
+# /etc/czertainly_appliance_version is a backward-compat symlink.
+if [ -f /etc/czertainly_appliance_version ] && [ ! -L /etc/czertainly_appliance_version ]; then
+    # Upgrading from an old appliance: promote old file to new name, replace with symlink
+    if [ ! -e /etc/appliance_version ]; then
+        mv /etc/czertainly_appliance_version /etc/appliance_version
+    else
+        rm /etc/czertainly_appliance_version
+    fi
+    ln -s /etc/appliance_version /etc/czertainly_appliance_version
+fi
 
 #DEBHELPER#
