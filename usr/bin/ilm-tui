@@ -518,7 +518,7 @@ network:" > $newSettings
                 rm $newSettings
                 logger "$p: settings changed $settings rewritten"
                 execAnsible \
-                    "sudo /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags network" \
+                    "sudo /usr/bin/ansible-playbook /etc/ilm-ansible/playbooks/ilm.yml --tags network" \
                     "network"
                 logger "$p: ansible finished"
             fi
@@ -604,7 +604,7 @@ proxy:" > $newSettings
             rm $newSettings
             logger "$p: settings changed $settings rewritten"
             execAnsible \
-                "sudo /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags http_proxy" \
+                "sudo /usr/bin/ansible-playbook /etc/ilm-ansible/playbooks/ilm.yml --tags http_proxy" \
                 "http_proxy"
             logger "$p: ansible finished"
             dialog --backtitle "$backTitleCentered" --title "Warning" --msgbox "If you are changing HTTP Proxy parameters before the first ILM installation, you have to close this terminal session and re-login back to make changes effective.
@@ -678,7 +678,7 @@ ntp:" > $newSettings
             rm $newSettings
             logger "$p: settings changed $settings rewritten"
             execAnsible \
-                "sudo /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags ntp" \
+                "sudo /usr/bin/ansible-playbook /etc/ilm-ansible/playbooks/ilm.yml --tags ntp" \
                 "ntp"
             logger "$p: ansible finished"
         fi
@@ -971,7 +971,7 @@ ilmConfig() {
     _x509ComplianceProvider=$(x2tf       "$_x509ComplianceProvider")
 
     echo "---
-czertainly:
+ilm:
   version: $_version
   commonCredentialProvider: $_commonCredentialProvider
   cryptosenseDiscoveryProvider: $_cryptosenseDiscoveryProvider
@@ -1466,7 +1466,7 @@ main() {
         then
         logger "$p: install confirmed"
         execAnsible \
-            "sudo /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml" \
+            "sudo /usr/bin/ansible-playbook /etc/ilm-ansible/playbooks/ilm.yml" \
             "full-install"
         else
             logger "$p: install canceled"
