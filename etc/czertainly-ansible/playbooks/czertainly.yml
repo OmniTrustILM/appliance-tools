@@ -82,9 +82,9 @@
       NO_PROXY: "{{ proxy.dont_use_for | default('') | join(',') }}"
     # by default rke2 role only install kube cfg for root
     custom_kube_cfg_dir:
-      - owner: "czertainly"
-        group: "czertainly"
-        dir: "/home/czertainly/.kube"
+      - owner: "ilm"
+        group: "ilm"
+        dir: "/home/ilm/.kube"
     # All CZERTAINLY services are running in parallel and causing big
     # stress on DB, it is better to support more simultaneous connections.
     postgres_max_connections: 250

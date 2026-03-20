@@ -16,7 +16,7 @@
 	branch = develop
 [submodule "etc/czertainly-ansible/roles/czertainly"]
 	path = etc/czertainly-ansible/roles/czertainly
-	url = https://github.com/CZERTAINLY/ansible-role-czertainly.git
+	url = git@github.com:semik/ansible-role-czertainly.git
 	branch = develop
 [submodule "etc/czertainly-ansible/roles/rke2"]
 	path = etc/czertainly-ansible/roles/rke2
