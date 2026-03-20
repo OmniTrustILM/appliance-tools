@@ -23,7 +23,7 @@ umask 002
 export ILM_TUI="ACTIVE"
 if [ "x$ANSIBLE_CONFIG" == "x" ]
 then
-   export ANSIBLE_CONFIG=/etc/czertainly-ansible/ansible.cfg
+   export ANSIBLE_CONFIG=/etc/ilm-ansible/ansible.cfg
 fi
 
 backTitle="ILM Appliance ($applianceVersion; $applianceIP)"
@@ -64,15 +64,15 @@ networkMenu=(
     'timeSync'     "Configure NTP parameters"
     'exit'         "Exit network menu"
 )
-networkSettings='/etc/czertainly-ansible/vars/network.yml'
-proxySettings='/etc/czertainly-ansible/vars/proxy.yml'
-ntpSettings='/etc/czertainly-ansible/vars/ntp.yml'
-dockerSettings='/etc/czertainly-ansible/vars/docker.yml'
-ilmSettings='/etc/czertainly-ansible/vars/czertainly.yml'
-databaseSettings='/etc/czertainly-ansible/vars/database.yml'
-ingressSettings='/etc/czertainly-ansible/vars/ingress.yml'
-trustedCASettings='/etc/czertainly-ansible/vars/trustedCA.yml'
-emailSettings='/etc/czertainly-ansible/vars/email.yml'
+networkSettings='/etc/ilm-ansible/vars/network.yml'
+proxySettings='/etc/ilm-ansible/vars/proxy.yml'
+ntpSettings='/etc/ilm-ansible/vars/ntp.yml'
+dockerSettings='/etc/ilm-ansible/vars/docker.yml'
+ilmSettings='/etc/ilm-ansible/vars/ilm.yml'
+databaseSettings='/etc/ilm-ansible/vars/database.yml'
+ingressSettings='/etc/ilm-ansible/vars/ingress.yml'
+trustedCASettings='/etc/ilm-ansible/vars/trustedCA.yml'
+emailSettings='/etc/ilm-ansible/vars/email.yml'
 rkeUninstall='/usr/local/bin/rke2-uninstall.sh'
 kubectl='/var/lib/rancher/rke2/bin/kubectl'
 
@@ -169,21 +169,20 @@ removeILM() {
     clear -x
     if [ -e $kubectl ]
     then
-        cmd="$kubectl delete ns czertainly"
+        cmd="$kubectl delete ns ilm"
         logger "$p: calling $cmd"
         sudo $cmd
         echo ""
         echo "ILM removed. Waiting for kubernetes to complete cleaning."
 
         sudo /usr/bin/rm /root/install/docker-secret.yaml
-        sudo /usr/bin/rm /root/install/czertainly-values.yaml
-        sudo /usr/bin/rm /root/install/czertainly-values.local.yaml
+        sudo /usr/bin/rm /root/install/values.local.yaml
 
         cleaned=0
         start=`date "+%s"`
         while true
         do
-            if `sudo $kubectl -n czertainly get all 2>&1 | grep 'No resources found' >/dev/null 2>&1`
+            if `sudo $kubectl -n ilm get all 2>&1 | grep 'No resources found' >/dev/null 2>&1`
             then
                 cleaned=0
                 logger "$p: ilm name space deleted"
@@ -197,7 +196,7 @@ removeILM() {
                     logger "$p: $msg"
                     echo "$msg"
                     echo ""
-                    sudo $kubectl -n czertainly get all
+                    sudo $kubectl -n ilm get all
                     echo ""
                     echo "Kubernetes failled to remove ilm namespace."
                     break
@@ -296,7 +295,7 @@ advancedMenu() {
     'installC')
         logger "$p: installing ILM only"
         execAnsible \
-            "sudo /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags czertainly"
+            "sudo /usr/bin/ansible-playbook /etc/ilm-ansible/playbooks/ilm.yml --tags ilm"
         logger "$p: installing ILM only"
         ;;
     'versions')

@@ -3,7 +3,7 @@
 ilm-versions
 echo ""
 
-declare -a NS=( 'kube-system' 'cert-manager' 'czertainly' )
+declare -a NS=( 'kube-system' 'cert-manager' 'ilm' )
 scriptName=`basename $0`
 
 detailed=$([[ "$1" == "--detailed" ]] && echo 1 || echo 0)
@@ -28,9 +28,9 @@ do
             echo "$ns	only $done_cnt of $total_cnt PODs are fine"
             cat $tmpf | sed "s/^/  /"
         fi
-        if [ $detailed -ne 0 ] && [ "$ns" == 'czertainly' ]
+        if [ $detailed -ne 0 ] && [ "$ns" == 'ilm' ]
         then
-            echo "czertainly versions:"
+            echo "versions:"
             kubectl -n $ns get pods -o jsonpath='{range .items[*]}{"  "}{.metadata.labels.app\.kubernetes\.io/name}{":  "}{range .spec.containers[*]}{.image}{" "}{end}{"\n"}{end}'
         fi
     else
