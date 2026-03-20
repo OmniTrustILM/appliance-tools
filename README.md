@@ -13,7 +13,7 @@ git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-http-pro
 git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-postgres.git etc/czertainly-ansible/roles/postgres
 git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-helm.git etc/czertainly-ansible/roles/helm
 git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-rke2.git etc/czertainly-ansible/roles/rke2
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-czertainly.git etc/czertainly-ansible/roles/czertainly
+git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-czertainly.git etc/czertainly-ansible/roles/ilm
 ```
 
 ### Update after checkout
