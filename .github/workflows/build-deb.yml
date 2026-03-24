@@ -28,10 +28,10 @@ jobs:
       - name: Publish package
         uses: mdallasanta/ssh-scp-deploy@v1.2.0
         with:
-          local: 'czertainly-appliance-tools*deb'
+          local: '*-appliance-tools*deb'
           remote: ${{ vars.DEB_REPO_DIRECTORY }}
           host: ${{ vars.DEB_REPO_HOST }}
           user: ${{ vars.DEB_REPO_USER }}
           key: ${{ secrets.DEB_REPO_KEY }}
           pre_upload: ls -la ${{ vars.DEB_REPO_DIRECTORY }}/*.deb && rm ${{ vars.DEB_REPO_DIRECTORY }}/*.deb; true
-          post_upload: set -e ; sudo ${{ vars.DEB_REPO_MANAGER }} add ${{ github.ref_name }} `ls -1c ${{ vars.DEB_REPO_DIRECTORY }}/czertainly-appliance-tools*.deb | head -1`; echo "Finished with error code $?"
+          post_upload: set -e ; sudo ${{ vars.DEB_REPO_MANAGER }} add ${{ github.ref_name }} `ls -1c ${{ vars.DEB_REPO_DIRECTORY }}/*-appliance-tools*.deb | head -1`; echo "Finished with error code $?"
