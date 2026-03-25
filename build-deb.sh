@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # test if repository was correctly initialized, if no initialize
-if [ ! -e etc/czertainly-ansible/roles/czertainly/tasks/main.yml ]
+if [ ! -e etc/ilm-ansible/roles/ilm/tasks/main.yml ]
 then
     git submodule update --init --recursive
 fi
@@ -22,4 +22,3 @@ for name in `cat debian/files | grep \.deb | sed 's/ .*$//'`; do
     mv -f "../$name" .
 done
 ls -l *deb
-

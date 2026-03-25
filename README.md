@@ -1,7 +1,7 @@
-# CZERTAINLY-Appliance-Tools
-Debian package with czertainly appliance tools.
+# ILM-Appliance-Tools
+Debian package with ILM appliance tools.
 
-## Content of etc/czertainly-ansible
+## Content of etc/ilm-ansible
 
 Is created as [git submodule](https://www.vogella.com/tutorials/GitSubmodules/article.html).
 
@@ -34,18 +34,18 @@ git submodule foreach 'git pull origin; \
 
 ### Change to your fork of submodule repository:
 ```sh
-git submodule set-url -- etc/czertainly-ansible/roles/rke2 git@github.com:semik/ansible-role-rke2.git
+git submodule set-url -- etc/ilm-ansible/roles/rke2 git@github.com:semik/ansible-role-rke2.git
 ```
-Type exactly `etc/czertainly-ansible/roles/rke2`, not `etc/czertainly-ansible/roles/rke2/` &#128540;
+Type exactly `etc/ilm-ansible/roles/rke2`, not `etc/ilm-ansible/roles/rke2/` &#128540;
 
-### Check which files in `/etc/czertainly-ansible/` have changed:
+### Check which files in `/etc/ilm-ansible/` have changed:
 ```sh
-$ debsums -as czertainly-appliance-tools 2>&1 |grep -v '\/etc\/czertainly-ansible\/vars'
-debsums: changed file /usr/bin/czertainly-tui (from czertainly-appliance-tools package)
-debsums: changed file /etc/czertainly-ansible/roles/czertainly/tasks/main.yml (from czertainly-appliance-tools package)
+$ debsums -as ilm-appliance-tools 2>&1 |grep -v '\/etc\/ilm-ansible\/vars'
+debsums: changed file /usr/bin/ilm-tui (from ilm-appliance-tools package)
+debsums: changed file /etc/ilm-ansible/roles/ilm/tasks/main.yml (from ilm-appliance-tools package)
 ```
 
-The directory `/etc/czertainly-ansible/vars` is excluded because it is modified by user of the appliance.
+The directory `/etc/ilm-ansible/vars` is excluded because it is modified by user of the appliance.
 
 
 ## Building package

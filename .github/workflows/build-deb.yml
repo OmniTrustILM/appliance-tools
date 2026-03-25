@@ -22,8 +22,8 @@ jobs:
       - name: Upload package artifact
         uses: actions/upload-artifact@v5
         with:
-          name: czertainly-appliance-tools
-          path: ${{ github.workspace }}/czertainly-appliance-tools*.deb
+          name: appliance-tools
+          path: ${{ github.workspace }}/*-appliance-tools*.deb
 
       - name: Publish package
         uses: mdallasanta/ssh-scp-deploy@v1.2.0
