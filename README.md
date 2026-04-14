@@ -13,7 +13,7 @@ git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-http-p
 git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-postgres.git etc/ilm-ansible/roles/postgres
 git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-helm.git etc/ilm-ansible/roles/helm
 git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-rke2.git etc/ilm-ansible/roles/rke2
-git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-czertainly.git etc/ilm-ansible/roles/ilm
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-ilm.git etc/ilm-ansible/roles/ilm
 ```
 
 ### Update after checkout
