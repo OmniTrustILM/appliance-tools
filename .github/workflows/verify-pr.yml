@@ -18,14 +18,14 @@ jobs:
         run: |
           # This checks for unknown repository URL. It asumes that base_GIT_URL
           # is also fine even when not from official
-          # https://github.com/CZERTAINLY/ to be able test package in forks.
+          # https://github.com/OmniTrustILM/ to be able test package in forks.
           #
 
           base_GIT_URL=`git config --get remote.origin.url | sed 's,\(.*\/\).*,\1,'`
 
           if git submodule foreach -q 'echo $(git config --get remote.origin.url)' |\
               grep -v "$base_GIT_URL" |\
-              grep -v 'https://github.com/CZERTAINLY/'
+              grep -v 'https://github.com/OmniTrustILM/'
           then
               echo "
           Unknown submodule URL, see above. Please check and add it into

@@ -7,24 +7,24 @@ Is created as [git submodule](https://www.vogella.com/tutorials/GitSubmodules/ar
 
 ### First time initialization
 ```sh
-cd CZERTAINLY-Appliance-Tools
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-czertainly-branding.git etc/czertainly-ansible/roles/branding
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-http-proxy.git etc/czertainly-ansible/roles/http-proxy
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-postgres.git etc/czertainly-ansible/roles/postgres
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-helm.git etc/czertainly-ansible/roles/helm
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-rke2.git etc/czertainly-ansible/roles/rke2
-git submodule add -b develop https://github.com/CZERTAINLY/ansible-role-czertainly.git etc/czertainly-ansible/roles/ilm
+cd appliance-tools
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-czertainly-branding.git etc/czertainly-ansible/roles/branding
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-http-proxy.git etc/czertainly-ansible/roles/http-proxy
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-postgres.git etc/czertainly-ansible/roles/postgres
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-helm.git etc/czertainly-ansible/roles/helm
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-rke2.git etc/czertainly-ansible/roles/rke2
+git submodule add -b develop https://github.com/OmniTrustILM/ansible-role-czertainly.git etc/czertainly-ansible/roles/ilm
 ```
 
 ### Update after checkout
 ```sh
-cd CZERTAINLY-Appliance-Tools
+cd appliance-tools
 git submodule update --init --recursive
 ```
 
 ### Update after changes in submodules
 ```sh
-cd CZERTAINLY-Appliance-Tools
+cd appliance-tools
 git submodule foreach 'git pull origin; \
   git checkout develop; \
   git reset --hard origin/develop; \
