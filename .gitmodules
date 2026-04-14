@@ -1,6 +1,6 @@
 [submodule "etc/czertainly-ansible/roles/branding"]
 	path = etc/ilm-ansible/roles/branding
-	url = https://github.com/OmniTrustILM/ansible-role-czertainly-branding.git
+	url = https://github.com/OmniTrustILM/ansible-role-ilm-branding.git
 	branch = develop
 [submodule "etc/czertainly-ansible/roles/http-proxy"]
 	path = etc/ilm-ansible/roles/http-proxy
