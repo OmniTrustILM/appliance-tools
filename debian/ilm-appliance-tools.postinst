@@ -1,0 +1,135 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+ILM_VARS_DIR="/etc/ilm-ansible/vars"
+OLD_VARS_DIR="/etc/czertainly-ansible/vars"
+VAR_FILES="ilm.yml database.yml docker.yml ingress.yml proxy.yml trustedCA.yml email.yml network.yml ntp.yml keycloak.yml"
+
+# ----------------------------------------------------------------
+# Pre-flight: refuse to upgrade if czertainly user is still running host
+# processes. We detect host-only processes by comparing each process's mount
+# namespace against the host init (PID 1) mount namespace. Kubernetes container
+# processes share the host PID namespace (and thus are visible in ps/pgrep) but
+# always run in their own mount namespace, so they are excluded automatically.
+# usermod -l will fail anyway, but this gives a clear actionable message.
+# ----------------------------------------------------------------
+if getent passwd czertainly >/dev/null 2>&1; then
+    CZERTAINLY_UID=$(getent passwd czertainly | cut -d: -f3)
+    HOST_MNT_NS=$(readlink /proc/1/ns/mnt)
+    HOST_PROCS=""
+    for PID in $(pgrep -U "$CZERTAINLY_UID" 2>/dev/null); do
+        PID_MNT_NS=$(readlink /proc/"$PID"/ns/mnt 2>/dev/null) || continue
+        if [ "$PID_MNT_NS" = "$HOST_MNT_NS" ]; then
+            HOST_PROCS="$HOST_PROCS $PID"
+        fi
+    done
+    if [ -n "$HOST_PROCS" ]; then
+        echo "ERROR: The 'czertainly' user (uid=$CZERTAINLY_UID) still has running host processes:" >&2
+        for PID in $HOST_PROCS; do
+            cat /proc/"$PID"/cmdline 2>/dev/null | tr '\0' ' ' >&2
+            echo >&2
+        done
+        echo "Please stop all czertainly processes before upgrading." >&2
+        echo "Read: https://github.com/OmniTrustILM/appliance/blob/master/upgrading2-2.17.0.md" >&2
+        exit 1
+    fi
+fi
+
+# ----------------------------------------------------------------
+# Transition: rename OS user czertainly -> ilm on existing appliances
+# ----------------------------------------------------------------
+if getent passwd czertainly >/dev/null 2>&1 && ! getent passwd ilm >/dev/null 2>&1; then
+    echo "Renaming OS user czertainly -> ilm"
+    usermod  -l ilm czertainly
+    groupmod -n ilm czertainly
+    if [ -d /home/czertainly ] && [ ! -d /home/ilm ]; then
+        usermod -d /home/ilm -m ilm
+    fi
+    # remove old sudoers file (new package installs sudoers.d/ilm)
+    rm -f /etc/sudoers.d/czertainly
+    # remove old dpkg-statoverride entries so they can be re-added with ilm owner
+    if dpkg-statoverride --list "$OLD_VARS_DIR" >/dev/null 2>&1; then
+        dpkg-statoverride --remove "$OLD_VARS_DIR"
+    fi
+    for F in $VAR_FILES; do
+        P="$OLD_VARS_DIR/$F"
+        if dpkg-statoverride --list "$P" >/dev/null 2>&1; then
+            dpkg-statoverride --remove "$P"
+        fi
+    done
+fi
+
+# ----------------------------------------------------------------
+# Transition: migrate vars directory czertainly-ansible -> ilm-ansible
+# (runs regardless of whether the user rename happened in this or a prior run)
+# Files are moved unconditionally, overwriting any package-installed defaults
+# in $ILM_VARS_DIR — the old user-configured files are the correct versions.
+# $OLD_VARS_DIR existing is the indicator that migration has not yet completed.
+# ----------------------------------------------------------------
+if [ -d "$OLD_VARS_DIR" ]; then
+    mkdir -p "$ILM_VARS_DIR"
+    # Remove stale statoverride entry for the old directory itself
+    if dpkg-statoverride --list "$OLD_VARS_DIR" >/dev/null 2>&1; then
+        dpkg-statoverride --remove "$OLD_VARS_DIR"
+    fi
+    # Move each yml file to the new location, overwriting package-installed
+    # defaults. czertainly.yml is renamed to ilm.yml in the process.
+    for OLD_F in "$OLD_VARS_DIR"/*.yml; do
+        [ -f "$OLD_F" ] || continue
+        BASE=$(basename "$OLD_F")
+        if dpkg-statoverride --list "$OLD_F" >/dev/null 2>&1; then
+            dpkg-statoverride --remove "$OLD_F"
+        fi
+        # Rename czertainly.yml -> ilm.yml
+        [ "$BASE" = "czertainly.yml" ] && BASE="ilm.yml"
+        mv "$OLD_F" "$ILM_VARS_DIR/$BASE"
+    done
+    # Remove the old directory now that all files are migrated
+    rmdir "$OLD_VARS_DIR" 2>/dev/null || true
+fi
+
+# allow ilm user to modify variables
+if ! dpkg-statoverride --list "$ILM_VARS_DIR" >/dev/null 2>&1
+then
+    dpkg-statoverride --update --add ilm ilm 775 "$ILM_VARS_DIR"
+fi
+
+for F in $VAR_FILES
+do
+    if ! dpkg-statoverride --list "$ILM_VARS_DIR/$F" >/dev/null 2>&1
+    then
+        dpkg-statoverride --update --add ilm ilm 664 "$ILM_VARS_DIR/$F"
+    fi
+done
+
+# Remove the abandoned Helm repo file if it exists
+REPO_FILE="/etc/apt/sources.list.d/baltocdn_com_helm_stable_debian.list"
+if [ -f "$REPO_FILE" ]; then
+    rm -f "$REPO_FILE"
+    echo "Removed abandoned Helm apt repository: $REPO_FILE"
+
+    # Remove keyring if previously removed repo was using it
+    KEYRING="/usr/share/keyrings/helm.asc"
+    if [ -f "$KEYRING" ]; then
+        rm -f "$KEYRING"
+        echo "Removed Helm keyring: $KEYRING"
+    fi
+fi
+
+
+# Transition: ensure /etc/appliance_version is the canonical file and
+# /etc/czertainly_appliance_version is a backward-compat symlink.
+if [ -f /etc/czertainly_appliance_version ] && [ ! -L /etc/czertainly_appliance_version ]; then
+    # Upgrading from an old appliance: promote old file to new name, replace with symlink
+    if [ ! -e /etc/appliance_version ]; then
+        mv /etc/czertainly_appliance_version /etc/appliance_version
+    else
+        rm /etc/czertainly_appliance_version
+    fi
+    ln -s /etc/appliance_version /etc/czertainly_appliance_version
+fi
+
+#DEBHELPER#

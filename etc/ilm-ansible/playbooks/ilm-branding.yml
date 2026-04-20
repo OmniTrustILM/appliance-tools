@@ -4,7 +4,7 @@
   tasks:
     - name: Read appliance version
       ansible.builtin.set_fact:
-        czertainly_appliance_version: "{{ lookup('ansible.builtin.file', '/etc/czertainly_appliance_version') }}"
+        appliance_version: "{{ lookup('ansible.builtin.file', '/etc/appliance_version') }}"
 
 - name: Install and configure CZERTAINLY virtual appliance
   hosts: local

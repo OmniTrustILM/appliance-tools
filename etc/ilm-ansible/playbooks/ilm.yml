@@ -1,15 +1,15 @@
 ---
-- name: Czertainly host config
+- name: Host config
   hosts: all
   connection: local
 
   pre_tasks:
-    - name: Get czertainly versions
-      ansible.builtin.command: /usr/bin/czertainly-versions
+    - name: Get ILM versions
+      ansible.builtin.command: /usr/bin/ilm-versions
       tags: always
       changed_when: false
       register: versions
-    - name: CZERTAINLY versions
+    - name: ilm versions
       ansible.builtin.debug:
         msg: "{{ versions.stdout }}"
     - name: Assert lowercase hostname
@@ -18,7 +18,7 @@
         fail_msg: "System hostname, has to be all lowercase, {{ ansible_fqdn }} doesn't match that rule. This is enforced by Kubernetes."
     - name: Check if keycloak file exists
       ansible.builtin.stat:
-        path: "/etc/czertainly-ansible/vars/keycloak.yml"
+        path: "/etc/ilm-ansible/vars/keycloak.yml"
       register: keycloak_result
       tags: always
     - name: Generate secret for keycloak
@@ -29,39 +29,39 @@
     - name: Write secret for keycloak
       ansible.builtin.template:
         src: "keycloak.yml.j2"
-        dest: "/etc/czertainly-ansible/vars/keycloak.yml"
+        dest: "/etc/ilm-ansible/vars/keycloak.yml"
         mode: "0640"
       when: not keycloak_result.stat.exists
       tags: always
     - name: "Read database.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/database.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/database.yml
       tags: always
     - name: "Read docker.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/docker.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/docker.yml
       tags: always
     - name: "Read proxy.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/proxy.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/proxy.yml
       tags: always
     - name: "Read network.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/network.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/network.yml
       tags: always
     - name: "Read ntp.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/ntp.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/ntp.yml
       tags: always
     - name: "Read ingress.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/ingress.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/ingress.yml
       tags: always
     - name: "Read trustedCA.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/trustedCA.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/trustedCA.yml
       tags: always
-    - name: "Read czertainly.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/czertainly.yml
+    - name: "Read ilm.yml"
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/ilm.yml
       tags: always
     - name: "Read keycloak.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/keycloak.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/keycloak.yml
       tags: always
     - name: "Read email.yml"
-      ansible.builtin.include_vars: /etc/czertainly-ansible/vars/email.yml
+      ansible.builtin.include_vars: /etc/ilm-ansible/vars/email.yml
       tags: always
 
   vars:
@@ -82,9 +82,9 @@
       NO_PROXY: "{{ proxy.dont_use_for | default('') | join(',') }}"
     # by default rke2 role only install kube cfg for root
     custom_kube_cfg_dir:
-      - owner: "czertainly"
-        group: "czertainly"
-        dir: "/home/czertainly/.kube"
+      - owner: "ilm"
+        group: "ilm"
+        dir: "/home/ilm/.kube"
     # All CZERTAINLY services are running in parallel and causing big
     # stress on DB, it is better to support more simultaneous connections.
     postgres_max_connections: 250
@@ -110,4 +110,4 @@
     - role: postgres
     - role: helm
     - role: rke2
-    - role: czertainly
+    - role: ilm
