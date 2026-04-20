@@ -65,8 +65,9 @@ fi
 # ----------------------------------------------------------------
 # Transition: migrate vars directory czertainly-ansible -> ilm-ansible
 # (runs regardless of whether the user rename happened in this or a prior run)
-# Iterates over individual files so it works even when $ILM_VARS_DIR already
-# exists (e.g. created by dpkg installing package conffiles before postinst).
+# Files are moved unconditionally, overwriting any package-installed defaults
+# in $ILM_VARS_DIR — the old user-configured files are the correct versions.
+# $OLD_VARS_DIR existing is the indicator that migration has not yet completed.
 # ----------------------------------------------------------------
 if [ -d "$OLD_VARS_DIR" ]; then
     mkdir -p "$ILM_VARS_DIR"
@@ -74,8 +75,8 @@ if [ -d "$OLD_VARS_DIR" ]; then
     if dpkg-statoverride --list "$OLD_VARS_DIR" >/dev/null 2>&1; then
         dpkg-statoverride --remove "$OLD_VARS_DIR"
     fi
-    # Move each yml file that does not yet exist in the new location.
-    # czertainly.yml is renamed to ilm.yml in the process.
+    # Move each yml file to the new location, overwriting package-installed
+    # defaults. czertainly.yml is renamed to ilm.yml in the process.
     for OLD_F in "$OLD_VARS_DIR"/*.yml; do
         [ -f "$OLD_F" ] || continue
         BASE=$(basename "$OLD_F")
@@ -84,10 +85,10 @@ if [ -d "$OLD_VARS_DIR" ]; then
         fi
         # Rename czertainly.yml -> ilm.yml
         [ "$BASE" = "czertainly.yml" ] && BASE="ilm.yml"
-        if [ ! -e "$ILM_VARS_DIR/$BASE" ]; then
-            mv "$OLD_F" "$ILM_VARS_DIR/$BASE"
-        fi
+        mv "$OLD_F" "$ILM_VARS_DIR/$BASE"
     done
+    # Remove the old directory now that all files are migrated
+    rmdir "$OLD_VARS_DIR" 2>/dev/null || true
 fi
 
 # allow ilm user to modify variables
