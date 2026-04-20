@@ -4,8 +4,7 @@ ilm-appliance-tools (2.17.0) stable; urgency=medium
   * Changed branding for grub & plymouth to ILM
   * Provide czertainly-* symlinks for backward compatibility
   * Rename user from czertainly to ilm
-  * Upgdates for Debian Trixie
-  * Transitional czertainly-appliance-tools package provided for smooth upgrade
+  * Updates for Debian Trixie
 
  -- Jan Tomášek <jan.tomasek@3key.company>  Mon, 20 Apr 2026 10:00:00 +0100
 
