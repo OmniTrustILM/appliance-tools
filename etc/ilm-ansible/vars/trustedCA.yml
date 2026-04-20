@@ -1,0 +1,3 @@
+# Configuration for Ansible ILM instalation.
+---
+#trustedCA_file: /home/ilm/trustedCA.pem
