@@ -1,4 +1,0 @@
-# Configuration for Ansible ILM instalation.
----
-network:
-  usedhcp: true

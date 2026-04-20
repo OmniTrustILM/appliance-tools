@@ -1,0 +1,25 @@
+Defaults  env_keep += "ANSIBLE_CONFIG"
+Defaults  secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/var/lib/rancher/rke2/bin"
+
+czertainly ALL = NOPASSWD: /sbin/shutdown -r now
+czertainly ALL = NOPASSWD: /sbin/shutdown -h now
+czertainly ALL = NOPASSWD: /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml
+czertainly ALL = NOPASSWD: /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags czertainly
+czertainly ALL = NOPASSWD: /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags network
+czertainly ALL = NOPASSWD: /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags http_proxy
+czertainly ALL = NOPASSWD: /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --tags ntp
+czertainly ALL = NOPASSWD: /usr/bin/ansible-playbook /etc/czertainly-ansible/playbooks/czertainly.yml --diff
+czertainly ALL = NOPASSWD: /usr/local/bin/rke2-uninstall.sh
+czertainly ALL = NOPASSWD: /usr/local/bin/update-hostname.sh
+czertainly ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl delete ns czertainly
+czertainly ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl -n czertainly get all
+czertainly ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n kube-system --no-headers=true
+czertainly ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n ingress-nginx --no-headers=true
+czertainly ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n cert-manager --no-headers=true
+czertainly ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n czertainly --no-headers=true
+czertainly ALL = NOPASSWD: /usr/bin/rm /root/install/docker-secret.yaml
+czertainly ALL = NOPASSWD: /usr/bin/rm /root/install/czertainly-values.yaml
+czertainly ALL = NOPASSWD: /usr/bin/rm /root/install/czertainly-values.local.yaml
+czertainly ALL = NOPASSWD: /usr/bin/apt update
+czertainly ALL = NOPASSWD: /usr/bin/apt upgrade
+czertainly ALL = NOPASSWD: /usr/bin/czertainly-update-hostname

@@ -1,15 +1,13 @@
-Source: ilm-appliance-tools
+Source: czertainly-appliance-tools
 Section: utils
 Priority: optional
 Build-Depends: debhelper (>= 3.0.5), perl (>= 5.24)
 Maintainer: Jan Tomasek <jan.tomasek@3key.company>
 Standards-Version: 4.5.1
 
-Package: ilm-appliance-tools
+Package: czertainly-appliance-tools
 Depends: ansible, dialog, bash-completion, gpg
-Conflicts: czertainly-appliance-tools (<< 2.17.0)
-Replaces: czertainly-appliance-tools (<< 2.17.0)
 Architecture: all
-Homepage: https://omnitrust.com
-Description: Tools to manage ILM appliance tasks like
- ILM installation, upgrade, etc.
+Homepage: http://czertainly.com
+Description: Tools to manage CZERTAINLY appliance tasks like
+ CZERTAINLY installation, upgrade, etc.

@@ -1,7 +1,7 @@
-# Configuration for Ansible ILM instalation.
+# Configuration for Ansible CZERTAINLY instalation.
 ---
-# Some parts of ILM are provided via a private repository, see:
-# https://docs.otilm.com/docs/certificate-key/current-versions
+# Some parts of CZERTAINLY are provided via a private repository, see:
+# https://docs.czertainly.com/docs/current-versions/#private-repository
 # for more details. You should specify the account you received for
 # accessing that repository.
 docker:

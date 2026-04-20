@@ -1,7 +1,7 @@
-# Configuration for Ansible ILM instalation.
+# Configuration for Ansible CZERTAINLY instalation.
 ---
 # If you are installing in a restricted network, you might need to
-# specify an HTTP proxy. ILM only requires http_proxy and
+# specify an HTTP proxy. CZERTAINLY only requires http_proxy and
 # https_proxy, but other system utilities might also need ftp.
 #
 # proxy:

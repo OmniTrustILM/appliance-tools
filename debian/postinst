@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -e
+
+. /usr/share/debconf/confmodule
+
+# create user & group
+# https://www.debian.org/doc/manuals/securing-debian-manual/bpp-lower-privs.en.html
+
+# allow czertainly user to modify variables
+if ! dpkg-statoverride --list /etc/czertainly-ansible/vars >/dev/null 2>&1
+then
+  dpkg-statoverride --update --add czertainly czertainly 775 /etc/czertainly-ansible/vars
+fi
+
+for F in /etc/czertainly-ansible/vars/czertainly.yml /etc/czertainly-ansible/vars/database.yml /etc/czertainly-ansible/vars/docker.yml /etc/czertainly-ansible/vars/ingress.yml /etc/czertainly-ansible/vars/proxy.yml /etc/czertainly-ansible/vars/trustedCA.yml /etc/czertainly-ansible/vars/email.yml /etc/czertainly-ansible/vars/network.yml /etc/czertainly-ansible/vars/ntp.yml
+do
+  if ! dpkg-statoverride --list $F  >/dev/null 2>&1
+  then
+    dpkg-statoverride --update --add czertainly czertainly 664 $F
+  fi
+done
+
+# Remove the abandoned Helm repo file if it exists
+REPO_FILE="/etc/apt/sources.list.d/baltocdn_com_helm_stable_debian.list"
+if [ -f "$REPO_FILE" ]; then
+    rm -f "$REPO_FILE"
+    echo "Removed abandoned Helm apt repository: $REPO_FILE"
+
+    # Remove keyring if previously removed repo was using it
+    KEYRING="/usr/share/keyrings/helm.asc"
+    if [ -f "$KEYRING" ]; then
+        rm -f "$KEYRING"
+        echo "Removed Helm keyring: $KEYRING"
+    fi
+fi
+
+
+
+#DEBHELPER#

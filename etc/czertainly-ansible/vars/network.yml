@@ -1,0 +1,4 @@
+# Configuration for Ansible CZERTAINLY instalation.
+---
+network:
+  usedhcp: true

@@ -1,7 +1,7 @@
 ---
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, develop]
   pull_request:
 
 jobs:
@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v5
 
       - name: Checkout submodules
         run: git submodule update --init --recursive
@@ -18,14 +18,14 @@ jobs:
         run: |
           # This checks for unknown repository URL. It asumes that base_GIT_URL
           # is also fine even when not from official
-          # https://github.com/OmniTrustILM/ to be able test package in forks.
+          # https://github.com/CZERTAINLY/ to be able test package in forks.
           #
 
           base_GIT_URL=`git config --get remote.origin.url | sed 's,\(.*\/\).*,\1,'`
 
           if git submodule foreach -q 'echo $(git config --get remote.origin.url)' |\
               grep -v "$base_GIT_URL" |\
-              grep -v 'https://github.com/OmniTrustILM/'
+              grep -v 'https://github.com/CZERTAINLY/'
           then
               echo "
           Unknown submodule URL, see above. Please check and add it into

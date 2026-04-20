@@ -1,1 +1,30 @@
-ilm-versions
+#!/bin/bash
+
+APPLIANCE_VERSION="?.?.?"
+[ -f /etc/czertainly_appliance_version ] && APPLIANCE_VERSION=`cat /etc/czertainly_appliance_version 2>&1`
+
+TOOLS_VERSION="?.?.?"
+T_VERSION=`apt -q show czertainly-appliance-tools 2>&1 |grep ^Version | sed "s/Version: //"`
+[ "x$T_VERSION" != "$T_VERSION" ] && TOOLS_VERSION=$T_VERSION
+
+CHART_VERSION="?.?.?"
+if [ -e /usr/bin/helm ]
+then
+    C_VERSION=`helm -n czertainly list -o json | jq .[0].chart | tr -d \"`
+    [ "x$C_VERSION" != "xnull" ] && CHART_VERSION=$C_VERSION
+fi
+
+echo "appliance: $APPLIANCE_VERSION; tools: $TOOLS_VERSION; chart: $CHART_VERSION"
+
+if [ "$1" == '--detailed' ]
+then
+    if kubectl version >/dev/null 2>&1
+    then
+        echo ""
+        kubectl get pods -n czertainly -o jsonpath='{range .items[*]}{.metadata.labels.app\.kubernetes\.io/name}{"\n"}{range .spec.initContainers[*]}  init: {.image}{"\n"}{end}{range .spec.containers[*]}  cont: {.image}{"\n"}{end}{end}'
+    else
+        echo ""
+        echo "missing or mailfunction kubectl can't provide more informations"
+        exit 1
+    fi
+fi

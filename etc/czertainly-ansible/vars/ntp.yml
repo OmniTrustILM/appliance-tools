@@ -1,4 +1,4 @@
-# Configuration for Ansible ILM instalation.
+# Configuration for Ansible CZERTAINLY instalation.
 # ---
 # ntp:
 #   timezone: Europe/Prage
