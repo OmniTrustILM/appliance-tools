@@ -13,10 +13,3 @@ Architecture: all
 Homepage: https://omnitrust.com
 Description: Tools to manage ILM appliance tasks like
  ILM installation, upgrade, etc.
-
-Package: czertainly-appliance-tools
-Architecture: all
-Depends: ilm-appliance-tools
-Description: transitional package - replaced by ilm-appliance-tools
- This is a transitional dummy package. It can safely be removed
- after ilm-appliance-tools is installed.
