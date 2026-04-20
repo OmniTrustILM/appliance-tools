@@ -7,7 +7,7 @@ ilm-appliance-tools (2.17.0) stable; urgency=medium
   * Upgdates for Debian Trixie
   * Transitional czertainly-appliance-tools package provided for smooth upgrade
 
- -- Jan Tomášek <jan.tomasek@3key.company>  Mon, 17 Mar 2026 10:00:00 +0100
+ -- Jan Tomášek <jan.tomasek@3key.company>  Mon, 20 Apr 2026 10:00:00 +0100
 
 czertainly-appliance-tools (2.16.0) stable; urgency=medium
   * raise version to 2.16.0
