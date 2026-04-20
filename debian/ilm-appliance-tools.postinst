@@ -33,6 +33,7 @@ if getent passwd czertainly >/dev/null 2>&1; then
             echo >&2
         done
         echo "Please stop all czertainly processes before upgrading." >&2
+        echo "Read: https://github.com/OmniTrustILM/appliance/blob/master/upgrading2-2.17.0.md" >&2
         exit 1
     fi
 fi
