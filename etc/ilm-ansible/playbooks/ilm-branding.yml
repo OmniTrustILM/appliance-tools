@@ -6,7 +6,7 @@
       ansible.builtin.set_fact:
         appliance_version: "{{ lookup('ansible.builtin.file', '/etc/appliance_version') }}"
 
-- name: Install and configure CZERTAINLY virtual appliance
+- name: Install and configure virtual appliance
   hosts: local
   roles:
     - branding
