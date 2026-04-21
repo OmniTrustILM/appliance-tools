@@ -798,7 +798,7 @@ x2tf() {
 }
 
 emailConfig() {
-    maxLen=20
+    maxLen=120
     maxInputLen=$[$eCOLS-20]
     local p=$FUNCNAME
     settings=$emailSettings
