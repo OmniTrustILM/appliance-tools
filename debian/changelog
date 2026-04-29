@@ -1,4 +1,5 @@
 ilm-appliance-tools (2.17.0-2) stable; urgency=medium
+  * Fix unnecessary request for ilm password
   * Enforce absolute paths for ingressTLS certificate and private key in ilm-tui
 
  -- Jan Tomášek <jan.tomasek@3key.company>  Tue, 29 Apr 2026 13:00:00 +0200
