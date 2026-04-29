@@ -1085,10 +1085,10 @@ ingressTLS() {
     then
         if [[ "$_certificate" != /* ]]
         then
-        errorMessage "Certificate path must be an absolute path (e.g. /home/user/czertainly.crt)."
+            errorMessage "Certificate path must be an absolute path (e.g. /home/user/czertainly.crt)."
         elif [[ "$_private_key" != /* ]]
         then
-        errorMessage "Private key path must be an absolute path (e.g. /home/user/czertainly.key)."
+            errorMessage "Private key path must be an absolute path (e.g. /home/user/czertainly.key)."
         elif testRes=$(testCertificateKey "$_certificate" "$_private_key")
         then
         echo "---
