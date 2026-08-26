@@ -73,6 +73,10 @@ databaseSettings='/etc/ilm-ansible/vars/database.yml'
 ingressSettings='/etc/ilm-ansible/vars/ingress.yml'
 trustedCASettings='/etc/ilm-ansible/vars/trustedCA.yml'
 emailSettings='/etc/ilm-ansible/vars/email.yml'
+# Not settings, read only: the list of the components which are pulled from
+# the private repository lives with the role installing them, so that marking
+# one here and checking it there can never disagree.
+ilmRoleDefaults='/etc/ilm-ansible/roles/ilm/defaults/main.yml'
 rkeUninstall='/usr/local/bin/rke2-uninstall.sh'
 kubectl='/var/lib/rancher/rke2/bin/kubectl'
 
@@ -781,6 +785,22 @@ tf2x() {
     return 0
 }
 
+# Asterisk for a component pulled from the private repository, nothing for
+# the rest. $privateComponents is read from the defaults of the ilm role,
+# which is also what the playbook checks the credentials against.
+privateMark() {
+    key=$1
+
+    case " $privateComponents " in
+        *" $key "*)
+            echo '*'
+            ;;
+        *)
+            echo ''
+            ;;
+    esac
+}
+
 # X to true|false
 x2tf() {
     in=$1
@@ -871,6 +891,7 @@ ilmConfig() {
     settings=$ilmSettings
 
     version=`grep < $settings '^ *version: ' | sed "s/^ *version: *//"`
+    cbomRepository=$(tf2x $(grep < $settings '^ *cbomRepository: ' | sed "s/^ *cbomRepository: *//"))
     commonCredentialProvider=$(tf2x $(grep < $settings '^ *commonCredentialProvider: ' | sed "s/^ *commonCredentialProvider: *//"))
     ejbcaNgConnector=$(tf2x $(grep < $settings '^ *ejbcaNgConnector: ' | sed "s/^ *ejbcaNgConnector: *//"))
     pymsAdcsConnector=$(tf2x $(grep < $settings '^ *pymsAdcsConnector: ' | sed "s/^ *pymsAdcsConnector: *//"))
@@ -885,28 +906,49 @@ ilmConfig() {
     utilsService=$(tf2x $(grep < $settings '^ *utilsService: ' | sed "s/^ *utilsService: *//"))
     emailProvider=$(tf2x $(grep < $settings '^ *emailProvider: ' | sed "s/^ *emailProvider: *//"))
     webhookNotificationProvider=$(tf2x $(grep < $settings '^ *webhookNotificationProvider: ' | sed "s/^ *webhookNotificationProvider: *//"))
+    externalAuthorityProvider=$(tf2x $(grep < $settings '^ *externalAuthorityProvider: ' | sed "s/^ *externalAuthorityProvider: *//"))
+    otpkiConnector=$(tf2x $(grep < $settings '^ *otpkiConnector: ' | sed "s/^ *otpkiConnector: *//"))
+    timestampFormattingConnector=$(tf2x $(grep < $settings '^ *timestampFormattingConnector: ' | sed "s/^ *timestampFormattingConnector: *//"))
+
+    # Which components are pulled from the private repository. Read out of the
+    # defaults of the ilm role, the same list the playbook refuses to install
+    # them without credentials by - a plain sed range, the 'grep -A 1000'
+    # idiom used for the lists in vars/ would run past the end of the block.
+    privateComponents=`sed -n '/^ilm_private_components:/,/^[^ #-]/p' $ilmRoleDefaults \
+        | sed -n 's/^ *- *//p' | tr '\n' ' '`
+    logger "$p: components of the private repository: $privateComponents"
 
     # dialog --form require parameters height width formheight
-    #  * at this moment we need 13 parameters from user
+    #  * at this moment we need 19 parameters from user
     #  * height = 0 means the smallest possible window size
+    #  * formheight is how many of them are visible at once, the form scrolls
+    #    when there are more, so keep it within the terminal - the two lines
+    #    of the prompt grow the window as well, hence -6
     #
+    formHeight=19
+    [ $formHeight -gt $[$eRows-6] ] && formHeight=$[$eRows-6]
+
     dialog --backtitle "$backTitleCentered" --title " ILM configuration " \
-       --form "Parameters of ILM installation" 0 $eCOLS 13 \
+       --form "Parameters of ILM installation\n* needs credentials for the private image repository." 0 $eCOLS $formHeight \
        "ILM version:"              1 1 "$version"                       1 21 $maxInputLen $maxLen \
-       "Common Credential Provider:"      2 1 "$commonCredentialProvider"      2 33 2            1 \
-       "Cryptosense Discovery Provider:"  3 1 "$cryptosenseDiscoveryProvider"  3 33 2            1 \
-       "CT logs Discovery Provider:"      4 1 "$ctLogsDiscoveryProvider"       4 33 2            1 \
-       "EJBCA NG Connector:"              5 1 "$ejbcaNgConnector"              5 33 2            1 \
-       "email Provider:"                  6 1 "$emailProvider"                 6 33 2            1 \
-       "HashiCorp Vaul Connector:"        7 1 "$hashicorpVaultConnector"       7 33 2            1 \
-       "Keycloak IdP:"                    8 1 "$keycloak"                      8 33 2            1 \
-       "Keystore Entity Provider:"        9 1 "$keystoreEntityProvider"        9 33 2            1 \
-       "Network Discovery Provider:"     10 1 "$networkDiscoveryProvider"     10 33 2            1 \
-       "py MS ADCS Connector:"           11 1 "$pymsAdcsConnector"            11 33 2            1 \
-       "Software Cryptography Provider:" 12 1 "$softwareCryptographyProvider" 12 33 2            1 \
-       "Utils Service:"                  13 1 "$utilsService"                 13 33 2            1 \
-       "webhook Notification Provider:"  14 1 "$webhookNotificationProvider"  14 33 2            1 \
-       "X509 Compliance Provider:"       15 1 "$x509ComplianceProvider"       15 33 2            1 \
+       "CBOM Repository$(privateMark cbomRepository):"                                2 1 "$cbomRepository"                 2 35 2            1 \
+       "Common Credential Provider$(privateMark commonCredentialProvider):"           3 1 "$commonCredentialProvider"       3 35 2            1 \
+       "Cryptosense Discovery Provider$(privateMark cryptosenseDiscoveryProvider):"   4 1 "$cryptosenseDiscoveryProvider"   4 35 2            1 \
+       "CT logs Discovery Provider$(privateMark ctLogsDiscoveryProvider):"            5 1 "$ctLogsDiscoveryProvider"        5 35 2            1 \
+       "EJBCA NG Connector$(privateMark ejbcaNgConnector):"                           6 1 "$ejbcaNgConnector"               6 35 2            1 \
+       "email Provider$(privateMark emailProvider):"                                  7 1 "$emailProvider"                  7 35 2            1 \
+       "External Authority Provider$(privateMark externalAuthorityProvider):"         8 1 "$externalAuthorityProvider"      8 35 2            1 \
+       "HashiCorp Vaul Connector$(privateMark hashicorpVaultConnector):"              9 1 "$hashicorpVaultConnector"        9 35 2            1 \
+       "Keycloak IdP$(privateMark keycloak):"                                        10 1 "$keycloak"                      10 35 2            1 \
+       "Keystore Entity Provider$(privateMark keystoreEntityProvider):"              11 1 "$keystoreEntityProvider"        11 35 2            1 \
+       "Network Discovery Provider$(privateMark networkDiscoveryProvider):"          12 1 "$networkDiscoveryProvider"      12 35 2            1 \
+       "OTPKI Connector$(privateMark otpkiConnector):"                               13 1 "$otpkiConnector"                13 35 2            1 \
+       "py MS ADCS Connector$(privateMark pymsAdcsConnector):"                       14 1 "$pymsAdcsConnector"             14 35 2            1 \
+       "Software Cryptography Provider$(privateMark softwareCryptographyProvider):"  15 1 "$softwareCryptographyProvider"  15 35 2            1 \
+       "Timestamp Formatting Connector$(privateMark timestampFormattingConnector):"  16 1 "$timestampFormattingConnector"  16 35 2            1 \
+       "Utils Service$(privateMark utilsService):"                                   17 1 "$utilsService"                  17 35 2            1 \
+       "webhook Notification Provider$(privateMark webhookNotificationProvider):"    18 1 "$webhookNotificationProvider"   18 35 2            1 \
+       "X509 Compliance Provider$(privateMark x509ComplianceProvider):"              19 1 "$x509ComplianceProvider"        19 35 2            1 \
        2>$tmpF
     # get dialog's exit status
     return_value=$?
@@ -920,17 +962,21 @@ ilmConfig() {
     # read selected components from temporary file written by dialog
     cat $tmpF | sed "s/^ //gm" | sed "s/ $//gm" | {
     read -r _version
+    read -r _cbomRepository
     read -r _commonCredentialProvider
     read -r _cryptosenseDiscoveryProvider
     read -r _ctLogsDiscoveryProvider
     read -r _ejbcaNgConnector
     read -r _emailProvider
+    read -r _externalAuthorityProvider
     read -r _hashicorpVaultConnector
     read -r _keycloak
     read -r _keystoreEntityProvider
     read -r _networkDiscoveryProvider
+    read -r _otpkiConnector
     read -r _pymsAdcsConnector
     read -r _softwareCryptographyProvider
+    read -r _timestampFormattingConnector
     read -r _utilsService
     read -r _webhookNotificationProvider
     read -r _x509ComplianceProvider
@@ -938,34 +984,42 @@ ilmConfig() {
     lines=`cat $tmpF | sed "s/^ //gm" | sed "s/ $//gm" | grep -v '^$' | wc -l`
 
     logger "$p: version                      '$version'                      => '$_version'"
+    logger "$p: cbomRepository               '$cbomRepository'               => '$_cbomRepository'"
     logger "$p: commonCredentialProvider     '$commonCredentialProvider'     => '$_commonCredentialProvider'"
     logger "$p: cryptosenseDiscoveryProvider '$cryptosenseDiscoveryProvider' => '$_cryptosenseDiscoveryProvider'"
     logger "$p: ctLogsDiscoveryProvider      '$ctLogsDiscoveryProvider'      => '$_ctLogsDiscoveryProvider'"
     logger "$p: ejbcaNgConnector             '$ejbcaNgConnector'             => '$_ejbcaNgConnector'"
     logger "$p: emailProvider                '$emailProvider'                => '$_emailProvider'"
+    logger "$p: externalAuthorityProvider    '$externalAuthorityProvider'    => '$_externalAuthorityProvider'"
     logger "$p: hashicorpVaultConnector      '$hashicorpVaultConnector'      => '$_hashicorpVaultConnector'"
     logger "$p: keycloak                     '$keycloak'                     => '$_keycloak'"
     logger "$p: keystoreEntityProvider       '$keystoreEntityProvider'       => '$_keystoreEntityProvider'"
     logger "$p: networkDiscoveryProvider     '$networkDiscoveryProvider'     => '$_networkDiscoveryProvider'"
+    logger "$p: otpkiConnector               '$otpkiConnector'               => '$_otpkiConnector'"
     logger "$p: pymsAdcsConnector            '$pymsAdcsConnector'            => '$_pymsAdcsConnector'"
     logger "$p: softwareCryptographyProvider '$softwareCryptographyProvider' => '$_softwareCryptographyProvider'"
+    logger "$p: timestampFormattingConnector '$timestampFormattingConnector' => '$_timestampFormattingConnector'"
     logger "$p: utilsService                 '$utilsService'                 => '$_utilsService'"
     logger "$p: webhookNotificationProvider  '$webhookNotificationProvider'  => '$_webhookNotificationProvider'"
     logger "$p: x509ComplianceProvider       '$x509ComplianceProvider'       => '$_x509ComplianceProvider'"
 
     newSettings=`mktemp /tmp/ilm-manager.ilm.XXXXXX`
 
+    _cbomRepository=$(x2tf               "$_cbomRepository")
     _commonCredentialProvider=$(x2tf     "$_commonCredentialProvider")
     _cryptosenseDiscoveryProvider=$(x2tf "$_cryptosenseDiscoveryProvider")
     _ctLogsDiscoveryProvider=$(x2tf      "$_ctLogsDiscoveryProvider")
     _ejbcaNgConnector=$(x2tf             "$_ejbcaNgConnector")
     _emailProvider=$(x2tf                "$_emailProvider")
+    _externalAuthorityProvider=$(x2tf    "$_externalAuthorityProvider")
     _hashicorpVaultConnector=$(x2tf      "$_hashicorpVaultConnector")
     _keycloak=$(x2tf                     "$_keycloak")
     _keystoreEntityProvider=$(x2tf       "$_keystoreEntityProvider")
     _networkDiscoveryProvider=$(x2tf     "$_networkDiscoveryProvider")
+    _otpkiConnector=$(x2tf               "$_otpkiConnector")
     _pymsAdcsConnector=$(x2tf            "$_pymsAdcsConnector")
     _softwareCryptographyProvider=$(x2tf "$_softwareCryptographyProvider")
+    _timestampFormattingConnector=$(x2tf "$_timestampFormattingConnector")
     _utilsService=$(x2tf                 "$_utilsService")
     _webhookNotificationProvider=$(x2tf  "$_webhookNotificationProvider")
     _x509ComplianceProvider=$(x2tf       "$_x509ComplianceProvider")
@@ -973,17 +1027,21 @@ ilmConfig() {
     echo "---
 ilm:
   version: $_version
+  cbomRepository: $_cbomRepository
   commonCredentialProvider: $_commonCredentialProvider
   cryptosenseDiscoveryProvider: $_cryptosenseDiscoveryProvider
   ctLogsDiscoveryProvider: $_ctLogsDiscoveryProvider
   ejbcaNgConnector: $_ejbcaNgConnector
   emailProvider: $_emailProvider
+  externalAuthorityProvider: $_externalAuthorityProvider
   hashicorpVaultConnector: $_hashicorpVaultConnector
   keycloak: $_keycloak
   keystoreEntityProvider: $_keystoreEntityProvider
   networkDiscoveryProvider: $_networkDiscoveryProvider
+  otpkiConnector: $_otpkiConnector
   pymsAdcsConnector: $_pymsAdcsConnector
   softwareCryptographyProvider: $_softwareCryptographyProvider
+  timestampFormattingConnector: $_timestampFormattingConnector
   utilsService: $_utilsService
   webhookNotificationProvider: $_webhookNotificationProvider
   x509ComplianceProvider: $_x509ComplianceProvider

@@ -6,7 +6,7 @@ set -e
 
 ILM_VARS_DIR="/etc/ilm-ansible/vars"
 OLD_VARS_DIR="/etc/czertainly-ansible/vars"
-VAR_FILES="ilm.yml database.yml docker.yml ingress.yml proxy.yml trustedCA.yml email.yml network.yml ntp.yml keycloak.yml"
+VAR_FILES="ilm.yml database.yml docker.yml ingress.yml proxy.yml trustedCA.yml email.yml network.yml ntp.yml keycloak.yml cbom.yml"
 
 # ----------------------------------------------------------------
 # Pre-flight: refuse to upgrade if czertainly user is still running host

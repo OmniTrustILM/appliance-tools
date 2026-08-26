@@ -15,3 +15,13 @@ ilm:
   utilsService: true
   webhookNotificationProvider: true
   emailProvider: false
+  # These are pulled from the private repository - see ilm_private_components
+  # in the defaults of the ilm role for the whole list, cryptosense above
+  # belongs to it as well. They install only with the credentials of
+  # docker.yml configured, so they are off here.
+  externalAuthorityProvider: false
+  otpkiConnector: false
+  timestampFormattingConnector: false
+  # Installed as a release of its own, not part of the ilm chart, and keeps
+  # its data outside the database - see the README of the ilm role.
+  cbomRepository: false

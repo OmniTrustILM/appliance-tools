@@ -1,0 +1,6 @@
+---
+# Credentials of the object storage of the CBOM repository. Generated once and
+# kept, the data in {{ ilm_cbom_data_dir | default('/var/lib/ilm/cbom-repo') }}
+# outlives the cluster and stays readable only with these.
+cbom_minio_access_key: "{{ cbom_access_key }}"
+cbom_minio_secret_key: "{{ cbom_secret_key }}"
