@@ -1,5 +1,6 @@
-ilm-appliance-tools (2.19.0~rc2) stable; urgency=medium
+ilm-appliance-tools (2.19.0~rc3) stable; urgency=medium
   * Updated RKE2 role to support custom RKE versions & defaulted to v1.36.2+rke2r1
+  * Added support for Traefik ingress class and local plugin for client certificate handling
   * Dropped installing standalone ingress-nginx
   * Ansible Roles cleanup and refactoring
   * Raised ILM version to 2.19.0
