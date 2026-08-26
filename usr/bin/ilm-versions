@@ -14,7 +14,14 @@ then
     [ "x$C_VERSION" != "xnull" ] && CHART_VERSION=$C_VERSION
 fi
 
-echo "appliance: $APPLIANCE_VERSION; tools: $TOOLS_VERSION; chart: $CHART_VERSION"
+RKE2_VERSION="not installed"
+if [ -x /usr/local/bin/rke2 ]
+then
+    R_VERSION=`/usr/local/bin/rke2 --version 2>/dev/null | awk '/^rke2 version/ {print $3; exit}'`
+    [ "x$R_VERSION" != "x" ] && RKE2_VERSION=$R_VERSION
+fi
+
+echo "appliance: $APPLIANCE_VERSION; tools: $TOOLS_VERSION; chart: $CHART_VERSION; rke2: $RKE2_VERSION"
 
 if [ "$1" == '--detailed' ]
 then

@@ -1,28 +1,28 @@
 [submodule "etc/ilm-ansible/roles/branding"]
 	path = etc/ilm-ansible/roles/branding
-	url = https://github.com/OmniTrustILM/ansible-role-ilm-branding.git
+	url = git@github.com:semik/ansible-role-ilm-branding.git
 	branch = develop
 [submodule "etc/ilm-ansible/roles/http-proxy"]
 	path = etc/ilm-ansible/roles/http-proxy
-	url = https://github.com/OmniTrustILM/ansible-role-http-proxy.git
+	url = git@github.com:semik/ansible-role-http-proxy.git
 	branch = develop
 [submodule "etc/ilm-ansible/roles/postgres"]
 	path = etc/ilm-ansible/roles/postgres
-	url = https://github.com/OmniTrustILM/ansible-role-postgres.git
+	url = git@github.com:semik/ansible-role-postgres.git
 	branch = develop
 [submodule "etc/ilm-ansible/roles/helm"]
 	path = etc/ilm-ansible/roles/helm
-	url = https://github.com/OmniTrustILM/ansible-role-helm.git
+	url = git@github.com:semik/ansible-role-helm.git
 	branch = develop
 [submodule "etc/ilm-ansible/roles/ilm"]
 	path = etc/ilm-ansible/roles/ilm
-	url = https://github.com/OmniTrustILM/ansible-role-ilm.git
+	url = git@github.com:semik/ansible-role-ilm.git
 	branch = develop
 [submodule "etc/ilm-ansible/roles/rke2"]
 	path = etc/ilm-ansible/roles/rke2
-	url = https://github.com/OmniTrustILM/ansible-role-rke2.git
+	url = git@github.com:semik/ansible-role-rke2.git
 	branch = develop
 [submodule "etc/ilm-ansible/roles/systemd-timesyncd"]
 	path = etc/ilm-ansible/roles/systemd-timesyncd
-	url = https://github.com/OmniTrustILM/ansible-role-systemd-timesyncd.git
+	url = git@github.com:semik/ansible-role-systemd-timesyncd.git
 	branch = develop

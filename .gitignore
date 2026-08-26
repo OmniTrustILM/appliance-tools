@@ -1,5 +1,8 @@
 *~
 *.deb
+# unpacked by build-deb.sh from the tarballs in vendor/
+usr/share/ilm-ansible/collections/
+vendor/requirements.yml
 debian/.debhelper
 debian/czertainly-appliance-tools/*
 debian/ilm-appliance-tools/*

@@ -5,7 +5,7 @@
 # for more details. You should specify the account you received for
 # accessing that repository.
 docker:
-  server: harbor.3key.company
+  server: hub.omnitrustregistry.com
   email: vmi-int@3key.company
   secret: regcred
 #  username: <username>

@@ -91,6 +91,55 @@
     # Following vars are used by systemd-timesyncd component
     ntp_servers: "{{ ntp.servers }}"
     system_timezone: "{{ ntp.timezone }}"
+    # The helm repository serves several majors at once, so the version has to
+    # be decided here instead of taking whatever is newest on build day. It has
+    # to match the kubernetes.core collection the package ships, see
+    # build-deb.sh: Helm 4 needs at least 6.4.0, and 6.5.0 for the helm module
+    # itself. 3.21.3-1 is the last Helm 3 line if this needs to go back.
+    helm_version: 4.2.3-1
+    # The helm diff plugin, pinned here for the same reason: the helm role
+    # carries its own default and moves on with its own life. Only installed
+    # when the plugin is missing, so raising this does not move a machine that
+    # already has it, "helm plugin uninstall diff" does.
+    # Releases: https://github.com/databus23/helm-diff/releases
+    helm_diff_version: "3.15.11"
+    # Which release of RKE2 (Kubernetes) the appliance installs. Pinned here
+    # instead of left to the 'stable' channel, so that the installed version
+    # is decided by this package and not by the day a machine is built.
+    # Releases: https://github.com/rancher/rke2/releases
+    #
+    # RKE2 is installed only once, on the first run, and never upgraded
+    # afterwards: changing this on an appliance where RKE2 already runs only
+    # makes the playbook report that the running version differs from the
+    # configured one. Set rke2_allow_upgrade below to upgrade in place, which
+    # stops and starts the Kubernetes cluster and cannot be undone, Kubernetes
+    # can't be downgraded. Only an exact version can be upgraded to, and jumps
+    # over a minor release (e.g. 1.34 -> 1.36) are refused.
+    rke2_version: v1.36.2+rke2r1
+    # What goes into the cluster next to RKE2 is pinned here as well, so that
+    # everything this appliance installs is decided in one place. The rke2 role
+    # carries its own defaults for these and moves on with its own life; a
+    # submodule bump then changes what a machine would install without the
+    # change ever showing up in this package - and unlike RKE2 above, both of
+    # these are upgraded in place as soon as the value changes, so it would
+    # move existing appliances too, on their next run.
+    #
+    # Bump these together with the rke2 submodule, the role's defaults are the
+    # combination it was tested with. A downgrade and a jump over a minor
+    # release are refused for both, minor releases have to be installed one at
+    # a time, always the newest patch of each.
+    # Releases: https://github.com/cert-manager/cert-manager/releases
+    rke2_certmanager_version: v1.21.1
+    # Releases: https://github.com/rancher/local-path-provisioner/releases
+    rke2_local_path_provisioner_version: v0.0.36
+    # The remaining settings of the rke2 role keep the role's defaults, see
+    # roles/rke2/defaults/main.yml and the role README. Uncomment to decide
+    # them here instead:
+    #
+    # Channel to install from, used only when rke2_version above is empty.
+    # rke2_channel: stable
+    # Whether an already installed RKE2 may be upgraded to rke2_version.
+    # rke2_allow_upgrade: false
   # Now we filterout those dict keys which have environment valuables
   # which have value equal to ''. This and previous block is need to
   # be able to use HTTP_PROXY and fiends and without playbook/machine

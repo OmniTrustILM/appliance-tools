@@ -1468,7 +1468,8 @@ main() {
         emailConfig
         ;;
     'install')
-        if confirm "Have you set up access credentials to harbor.3key.company and possibly adjusted other options? Please confirm installation by selecting Yes button. Complete installation takes about 15 minutes."
+        dockerServer=`grep < $dockerSettings '^ *server: ' | sed "s/^ *server: *//"`
+        if confirm "Have you set up access credentials to ${dockerServer} and possibly adjusted other options? Please confirm installation by selecting Yes button. Complete installation takes about 15 minutes."
         then
         logger "$p: install confirmed"
         execAnsible \
