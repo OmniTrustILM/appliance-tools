@@ -77,6 +77,9 @@ emailSettings='/etc/ilm-ansible/vars/email.yml'
 # the private repository lives with the role installing them, so that marking
 # one here and checking it there can never disagree.
 ilmRoleDefaults='/etc/ilm-ansible/roles/ilm/defaults/main.yml'
+# The mail server check, the same one the playbook runs before it installs the
+# email notification provider, so what is accepted here installs there.
+smtpCheck='/usr/bin/ilm-smtp-check'
 rkeUninstall='/usr/local/bin/rke2-uninstall.sh'
 kubectl='/var/lib/rancher/rke2/bin/kubectl'
 
@@ -817,11 +820,62 @@ x2tf() {
 
 }
 
-emailConfig() {
-    maxLen=120
-    maxInputLen=$[$eCOLS-20]
+# Ask the mail server whether it accepts the settings, with the very tool the
+# playbook runs before it installs the email notification provider. That
+# provider connects and authenticates while its context starts, so settings it
+# refuses do not degrade a feature - they leave the pod in CrashLoopBackOff and
+# the installation waiting out its helm timeout. Returns 0 when the server is
+# happy, otherwise echoes what it answered, the way testCertificateKey() does.
+testSMTP() {
+    local host=$1
+    local port=$2
+    local tls=$3
+    local username=$4
+    local password=$5
     local p=$FUNCNAME
-    settings=$emailSettings
+    local emsg
+    local args=(--host "$host" --timeout 10)
+
+    [ "$port" != '' ] && args+=(--port "$port")
+
+    if [ "$tls" == 'true' ]
+    then
+        args+=(--tls)
+    else
+        args+=(--no-tls)
+    fi
+
+    [ "$username" != '' ] && args+=(--user "$username")
+
+    # The password goes through the environment, so that it stays out of the
+    # process list. Only stderr is wanted, stdout is the success message.
+    if emsg=$(SMTP_PASSWORD="$password" $smtpCheck "${args[@]}" 2>&1 >/dev/null)
+    then
+        logger "$p: $host accepted the settings"
+        return 0
+    fi
+
+    logger "$p: $host refused the settings: $emsg"
+    echo "$emsg"
+    return 1
+}
+
+# Whether vars/email.yml names a mail server at all. mail.example.com is what
+# the package ships, it does not resolve, and the playbook refuses it as well.
+mailServerConfigured() {
+    local host=`grep < $emailSettings '^ *smtp_host: ' | sed "s/^ *smtp_host: *//"`
+
+    [ "$host" != '' ] && [ "$host" != 'mail.example.com' ]
+}
+
+emailConfig() {
+    local maxLen=120
+    local maxInputLen=$[$eCOLS-20]
+    local p=$FUNCNAME
+    # local, unlike the other screens: ilmConfig calls this one and would
+    # otherwise carry on writing the ilm settings into email.yml.
+    local settings=$emailSettings
+    local newSettings
 
     smtp_host=`grep < $settings '^ *smtp_host: ' | sed "s/^ *smtp_host: *//"`
     smtp_port=`grep < $settings '^ *smtp_port: ' | sed "s/^ *smtp_port: *//"`
@@ -829,41 +883,69 @@ emailConfig() {
     smtp_username=`grep < $settings '^ *smtp_username: ' | sed "s/^ *smtp_username: *//"`
     smtp_password=`grep < $settings '^ *smtp_password: ' | sed "s/^ *smtp_password: *//"`
 
-    dialog --backtitle "$backTitleCentered" --title " SMTP configuration " \
-       --form "Parameters of email server used for notifications" 17 $eCOLS 6 \
-       "Hostname:"           1 1 "$smtp_host"      1 15 $maxInputLen $maxLen \
-       "Port number:"        2 1 "$smtp_port"      2 15 $maxInputLen $maxLen \
-       "Use TLS:"            3 1 "$smtp_tls"       3 15 2            1 \
-       "Username:"           4 1 "$smtp_username"  4 15 $maxInputLen $maxLen \
-       "Passsword:"          5 1 "$smtp_password"  5 15 $maxInputLen $maxLen \
-       2>$tmpF
-    # get dialog's exit status
-    return_value=$?
+    # The form comes back with what was typed when the mail server refuses the
+    # settings, so the fields have to survive being read - hence the redirect
+    # below where the other screens pipe into a subshell and lose them.
+    while true
+    do
+        dialog --backtitle "$backTitleCentered" --title " SMTP configuration " \
+           --form "Parameters of email server used for notifications" 17 $eCOLS 6 \
+           "Hostname:"           1 1 "$smtp_host"      1 15 $maxInputLen $maxLen \
+           "Port number:"        2 1 "$smtp_port"      2 15 $maxInputLen $maxLen \
+           "Use TLS:"            3 1 "$smtp_tls"       3 15 2            1 \
+           "Username:"           4 1 "$smtp_username"  4 15 $maxInputLen $maxLen \
+           "Password:"           5 1 "$smtp_password"  5 15 $maxInputLen $maxLen \
+           2>$tmpF
+        # get dialog's exit status
+        return_value=$?
 
-    if [ $return_value != $DIALOG_OK ]
-    then
-        logger "$p: dialog not OK => returing without any change"
-        return 1
-    fi
+        if [ $return_value != $DIALOG_OK ]
+        then
+            logger "$p: dialog not OK => returing without any change"
+            return 1
+        fi
 
-    cat $tmpF | sed "s/^ //gm" | sed "s/ $//gm" | {
-    read -r _smtp_host
-    read -r _smtp_port
-    read -r _smtp_tls
-    read -r _smtp_username
-    read -r _smtp_password
+        {
+        read -r _smtp_host
+        read -r _smtp_port
+        read -r _smtp_tls
+        read -r _smtp_username
+        read -r _smtp_password
+        } < <(sed "s/^ //gm" $tmpF | sed "s/ $//gm")
 
-    lines=`cat $tmpF | sed "s/^ //gm" | sed "s/ $//gm" | grep -v '^$' | wc -l`
+        logger "$p: smtp_host      '$smtp_host'     => '$_smtp_host'"
+        logger "$p: smtp_port      '$smtp_port'     => '$_smtp_port'"
+        logger "$p: smtp_tls       '$smtp_tls'      => '$_smtp_tls'"
+        logger "$p: smtp_username  '$smtp_username' => '$_smtp_username'"
 
-    logger "$p: smtp_host      '$smtp_host'     => '$_smtp_host'"
-    logger "$p: smtp_port      '$smtp_port'     => '$_smtp_port'"
-    logger "$p: smtp_tls       '$smtp_tls'      => '$_smtp_tls'"
-    logger "$p: smtp_username  '$smtp_username' => '$_smtp_username'"
-    logger "$p: smtp_password  '$smtp_password' => '$_smtp_password'"
+        _smtp_tls=$(x2tf "$_smtp_tls")
+
+        # what the form shows on the next round
+        smtp_host=$_smtp_host
+        smtp_port=$_smtp_port
+        smtp_tls=$(tf2x "$_smtp_tls")
+        smtp_username=$_smtp_username
+        smtp_password=$_smtp_password
+
+        if [ "$_smtp_host" == '' ]
+        then
+            errorMessage "Hostname of the mail server is required."
+            continue
+        fi
+
+        emsg=$(testSMTP "$_smtp_host" "$_smtp_port" "$_smtp_tls" "$_smtp_username" "$_smtp_password") && break
+
+        dialog --backtitle "$backTitleCentered" --title 'Error[!]' \
+           --yesno "The mail server did not accept these settings:
+
+$emsg
+
+Keep them anyway? ILM will not install while they are refused." 15 $eCOLS
+
+        [ $? == $DIALOG_OK ] && break
+    done
 
     newSettings=`mktemp /tmp/ilm-manager.email.XXXXXX`
-
-    _smtp_tls=$(x2tf "$_smtp_tls")
 
     echo "---" > $newSettings
     [ "$_smtp_host" != '' ]     && echo "smtp_host: $_smtp_host" >> $newSettings
@@ -881,7 +963,6 @@ emailConfig() {
         rm $newSettings
         logger "$p: settings changed $settings rewritten"
     fi
-    }
 }
 
 ilmConfig() {
@@ -959,8 +1040,11 @@ ilmConfig() {
         return 1
     fi
 
-    # read selected components from temporary file written by dialog
-    cat $tmpF | sed "s/^ //gm" | sed "s/ $//gm" | {
+    # read selected components from temporary file written by dialog. The
+    # redirect below reads them in this shell, where a pipe would read them in
+    # a subshell - the mail server check further down opens the SMTP screen,
+    # which writes over $tmpF while a pipe would still be reading it.
+    {
     read -r _version
     read -r _cbomRepository
     read -r _commonCredentialProvider
@@ -980,8 +1064,7 @@ ilmConfig() {
     read -r _utilsService
     read -r _webhookNotificationProvider
     read -r _x509ComplianceProvider
-
-    lines=`cat $tmpF | sed "s/^ //gm" | sed "s/ $//gm" | grep -v '^$' | wc -l`
+    } < <(sed "s/^ //gm" $tmpF | sed "s/ $//gm")
 
     logger "$p: version                      '$version'                      => '$_version'"
     logger "$p: cbomRepository               '$cbomRepository'               => '$_cbomRepository'"
@@ -1024,6 +1107,25 @@ ilmConfig() {
     _webhookNotificationProvider=$(x2tf  "$_webhookNotificationProvider")
     _x509ComplianceProvider=$(x2tf       "$_x509ComplianceProvider")
 
+    # The email notification provider connects to the mail server and
+    # authenticates while it starts, so switching it on without one configured
+    # installs a pod that does nothing but crash, and the playbook refuses to
+    # get that far. Offer the SMTP screen instead of writing a setting that
+    # cannot install.
+    if [ "$_emailProvider" == 'true' ] && ! mailServerConfigured
+    then
+        logger "$p: emailProvider enabled without a mail server"
+        errorMessage "email Provider sends through a mail server, and none is configured yet. The next screen asks for it."
+        emailConfig
+
+        if ! mailServerConfigured
+        then
+            logger "$p: still no mail server, leaving emailProvider off"
+            errorMessage "No mail server configured, email Provider stays switched off."
+            _emailProvider='false'
+        fi
+    fi
+
     echo "---
 ilm:
   version: $_version
@@ -1056,7 +1158,6 @@ ilm:
         rm $newSettings
         logger "$p: settings changed $settings rewritten"
     fi
-    }
 }
 
 testCertificateKey() {

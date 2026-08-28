@@ -39,13 +39,13 @@ echo "done."
 
 install='debian/ilm-appliance-tools.install'
 echo -n "Creating $install: "
-# Editor backups and anything in a dot directory or dot file are development
-# leftovers of the role submodules (.git, .github, .travis.yml, .ansible,
-# .claude, .yamllint, ...), they have no business in the package - and every
-# file under /etc becomes a conffile, so shipping one means carrying it
-# forever.
+# Editor backups, __pycache__ left behind by running one of the scripts, and
+# anything in a dot directory or dot file are development leftovers of the role
+# submodules (.git, .github, .travis.yml, .ansible, .claude, .yamllint, ...),
+# they have no business in the package - and every file under /etc becomes a
+# conffile, so shipping one means carrying it forever.
 (find ./etc -type f; find ./usr \( -type f -o -type l \)) |\
-    grep -vE '~$|/\.' > $install
+    grep -vE '~$|/\.|/__pycache__/' > $install
 echo "done."
 
 cp -f LICENSE debian/copyright
