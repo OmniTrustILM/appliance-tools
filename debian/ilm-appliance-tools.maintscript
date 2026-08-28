@@ -1,0 +1,11 @@
+# Files under /etc are conffiles, and dpkg keeps an obsolete conffile on disk
+# forever unless the removal is registered here. Ansible loads a role's
+# vars/main.yml whenever it exists, at a precedence above the play vars in
+# playbooks/ilm.yml, so a leftover copy would keep overriding the role
+# variables - the tasks/ files are only dead weight.
+#
+# No prior-version on purpose: the removal is then attempted on every upgrade,
+# which also covers appliances running a locally built 2.18.0~rc1.
+rm_conffile /etc/ilm-ansible/roles/rke2/vars/main.yml
+rm_conffile /etc/ilm-ansible/roles/rke2/tasks/ingress-nginx.yml
+rm_conffile /etc/ilm-ansible/roles/rke2/files/ingres-host-ports.patch.json
