@@ -14,10 +14,18 @@ fi
 # 2026-02-10, so the appliance carries its own collection instead.
 # /etc/ilm-ansible/ansible.cfg puts this directory first on collections_path.
 #
-# Plain tar on purpose: the GitHub builder installs only debhelper, dpkg-dev
-# and build-essential, there is no ansible-galaxy there. Refresh the tarball
-# with the command in vendor/README.md.
+# The tarball is downloaded rather than committed - a 361K binary has no place
+# in git - and kept in vendor/ as a cache, so only the first build of a
+# checkout needs the network. The checksum below is what makes that
+# trustworthy; it is verified whether the tarball was just fetched or found in
+# the cache, which also catches a truncated download.
+#
+# curl and tar on purpose: the GitHub builder installs only debhelper, dpkg-dev
+# and build-essential, there is no ansible-galaxy there. See vendor/README.md
+# for how to move to a newer version.
 kubernetes_core_version='6.5.0'
+kubernetes_core_sha256='26f28c7048180bdd941d78f00950a5217d682d57dc915399596eac39a46763df'
+galaxy='https://galaxy.ansible.com/api/v3/plugin/ansible/content/published/collections/artifacts'
 collections='usr/share/ilm-ansible/collections'
 tarball="vendor/kubernetes-core-${kubernetes_core_version}.tar.gz"
 target="$collections/ansible_collections/kubernetes/core"
@@ -25,11 +33,31 @@ target="$collections/ansible_collections/kubernetes/core"
 echo -n "Vendoring kubernetes.core $kubernetes_core_version: "
 if [ ! -f "$tarball" ]
 then
+    mkdir -p vendor
+    url="$galaxy/kubernetes-core-${kubernetes_core_version}.tar.gz"
+    # curl's own message is kept, but out of the way of the progress line, and
+    # --retry says the same thing once per attempt.
+    if ! error=$(curl -fsSL --retry 3 -o "$tarball" "$url" 2>&1)
+    then
+        rm -f "$tarball"
+        echo "FAILED"
+        echo "could not download $url"
+        [ -n "$error" ] && echo "$error" | uniq | sed 's/^/  /'
+        exit 1
+    fi
+fi
+
+if ! echo "$kubernetes_core_sha256  $tarball" | sha256sum --check --status
+then
     echo "FAILED"
-    echo "$tarball is missing, fetch it once with:"
-    echo "  ansible-galaxy collection download kubernetes.core:${kubernetes_core_version} -p vendor/"
+    echo "$tarball does not have the expected contents:"
+    echo "  expected $kubernetes_core_sha256"
+    echo "  found    $(sha256sum < "$tarball" | cut -d' ' -f1)"
+    echo "Delete it to download it again, or set kubernetes_core_sha256 above"
+    echo "if you have just changed kubernetes_core_version."
     exit 1
 fi
+
 rm -rf "$collections"
 mkdir -p "$target"
 tar -xzf "$tarball" -C "$target"

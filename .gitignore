@@ -1,7 +1,9 @@
 *~
 *.deb
-# unpacked by build-deb.sh from the tarballs in vendor/
+# downloaded and unpacked by build-deb.sh; vendor/ is a cache, only
+# vendor/README.md is tracked
 usr/share/ilm-ansible/collections/
+vendor/*.tar.gz
 vendor/requirements.yml
 # Only what a build leaves behind. Named one by one on purpose: a pattern like
 # debian/ilm-appliance-tools.* covers the build artefacts but also .postinst
