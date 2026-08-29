@@ -1,7 +1,7 @@
 ---
 on:
   push:
-    branches: [main, master, develop]
+    branches: [main, master, develop, 2.19.0]
 
 jobs:
   build:
