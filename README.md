@@ -34,9 +34,33 @@ git submodule foreach 'git pull origin; \
 
 ### Change to your fork of submodule repository:
 ```sh
-git submodule set-url -- etc/ilm-ansible/roles/rke2 git@github.com:semik/ansible-role-rke2.git
+./switch-submodule-fork.sh fork rke2       # -> https://github.com/semik/ansible-role-rke2.git
+./switch-submodule-fork.sh upstream        # all of them back to OmniTrustILM
+./switch-submodule-fork.sh status          # what is configured right now
 ```
-Type exactly `etc/ilm-ansible/roles/rke2`, not `etc/ilm-ansible/roles/rke2/` &#128540;
+Under the hood that is `git submodule set-url`, where the path has to be typed
+exactly as `etc/ilm-ansible/roles/rke2`, not `etc/ilm-ansible/roles/rke2/` &#128540;
+
+The URL has to stay `https://`: that is what the CI runner and anyone without a
+github account can clone. To push to your fork over ssh anyway, put this in
+`~/.gitconfig` once:
+```ini
+[url "git@github.com:"]
+	pushInsteadOf = https://github.com/
+```
+Fetching then uses the `https` URL as recorded in `.gitmodules`, while every
+push is rewritten to ssh and goes out over your key. It changes the transport
+only, not the owner, so pushing to your fork still means switching to it first.
+
+### Check the submodules before opening a pull request:
+```sh
+./.github/verify-submodules.sh
+```
+This is what the `verify-pr` workflow runs. It reports any submodule that is
+not on `https://github.com/`, that belongs to neither OmniTrustILM nor the
+owner of this repository, or whose pinned commit is on no branch or tag of the
+repository it names - the last one being how a fork leaks into a release
+without the URL showing it.
 
 ### Check which files in `/etc/ilm-ansible/` have changed:
 ```sh
