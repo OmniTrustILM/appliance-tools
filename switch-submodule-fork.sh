@@ -131,6 +131,6 @@ if [ "$changed" = yes ]; then
 	fi
 	echo "
 Run ./.github/verify-submodules.sh now: a fork does not necessarily carry the
-commit a submodule is pinned to, and pointing at one that does not breaks
+commit a submodule is pinned to, and pointing at one that does not break
 every clone."
 fi

@@ -6,7 +6,7 @@
 # accessing that repository.
 docker:
   server: hub.omnitrustregistry.com
-#  email: user@example.com
+  email: user@example.com
   secret: regcred
 #  username: <username>
 #  password: <password>

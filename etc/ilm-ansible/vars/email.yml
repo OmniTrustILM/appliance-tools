@@ -1,4 +1,4 @@
-# Configuration for Ansible ILM instalation.
+# Configuration for Ansible ILM installation.
 #
 # The mail server the email notification provider sends notifications
 # through, the Mail screen of ilm-tui writes it. It is only used when

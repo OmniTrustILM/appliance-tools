@@ -11,7 +11,7 @@ fi
 # it passes the Helm 3 only "--all" flag to "helm list", so every helm task
 # fails with "unknown flag: --all" as soon as Helm 4 is installed. Helm 3 gets
 # its final feature release on 2026-09-09 and security fixes only until
-# 2026-02-10, so the appliance carries its own collection instead.
+# 2027-02-10, so the appliance carries its own collection instead.
 # /etc/ilm-ansible/ansible.cfg puts this directory first on collections_path.
 #
 # The tarball is downloaded rather than committed - a 361K binary has no place
