@@ -1,0 +1,1 @@
+etc/ilm-ansible/roles/ilm/files/smtp-check.py usr/bin/ilm-smtp-check

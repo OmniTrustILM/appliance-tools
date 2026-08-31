@@ -5,19 +5,48 @@ APPLIANCE_VERSION="?.?.?"
 
 TOOLS_VERSION="?.?.?"
 T_VERSION=`apt -q show ilm-appliance-tools 2>&1 |grep ^Version | sed "s/Version: //"`
-[ "x$T_VERSION" != "$T_VERSION" ] && TOOLS_VERSION=$T_VERSION
+[ "x$T_VERSION" != "x" ] && TOOLS_VERSION=$T_VERSION
 
 CHART_VERSION="?.?.?"
 if [ -e /usr/bin/helm ]
 then
-    C_VERSION=`helm -n ilm list -o json | jq .[0].chart | tr -d \"`
-    [ "x$C_VERSION" != "xnull" ] && CHART_VERSION=$C_VERSION
+    # By name, not by position: the namespace holds more than one release
+    # since the cbom repository became one of its own, and helm sorts them by
+    # name - so .[0] is cbom-repository, not ilm.
+    C_VERSION=`helm -n ilm list -o json 2>/dev/null |
+        jq -r 'map(select(.name == "ilm"))[0].chart // empty' 2>/dev/null`
+    # A select that matches nothing yields an empty string where the old
+    # .[0].chart yielded the literal null, so this tests for empty - which
+    # covers helm failing outright as well.
+    [ "x$C_VERSION" != "x" ] && CHART_VERSION=$C_VERSION
 fi
 
-echo "appliance: $APPLIANCE_VERSION; tools: $TOOLS_VERSION; chart: $CHART_VERSION"
+RKE2_VERSION="not installed"
+if [ -x /usr/local/bin/rke2 ]
+then
+    R_VERSION=`/usr/local/bin/rke2 --version 2>/dev/null | awk '/^rke2 version/ {print $3; exit}'`
+    [ "x$R_VERSION" != "x" ] && RKE2_VERSION=$R_VERSION
+fi
+
+echo "appliance: $APPLIANCE_VERSION; tools: $TOOLS_VERSION; chart: $CHART_VERSION; rke2: $RKE2_VERSION"
 
 if [ "$1" == '--detailed' ]
 then
+    if [ -e /usr/bin/helm ]
+    then
+        echo ""
+        echo "releases:"
+        # printf rather than the tabs jq emits: release and chart names differ
+        # enough in length that a tab stop puts the columns nowhere near each
+        # other.
+        helm -n ilm list -o json 2>/dev/null |
+            jq -r '.[] | "\(.name)\t\(.chart)\t\(.status)"' 2>/dev/null |
+            while IFS=$'\t' read -r name chart status
+            do
+                printf '  %-18s %-24s %s\n' "$name" "$chart" "$status"
+            done
+    fi
+
     if kubectl version >/dev/null 2>&1
     then
         echo ""

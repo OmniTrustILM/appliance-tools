@@ -18,7 +18,7 @@ ilm ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n ingress-nginx 
 ilm ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n cert-manager --no-headers=true
 ilm ALL = NOPASSWD: /var/lib/rancher/rke2/bin/kubectl get pods -n ilm --no-headers=true
 ilm ALL = NOPASSWD: /usr/bin/rm /root/install/docker-secret.yaml
-ilm ALL = NOPASSWD: /usr/bin/rm /root/install/ilm-values.local.yaml
+ilm ALL = NOPASSWD: /usr/bin/rm /root/install/values.local.yaml
 ilm ALL = NOPASSWD: /usr/bin/apt update
 ilm ALL = NOPASSWD: /usr/bin/apt upgrade
 ilm ALL = NOPASSWD: /usr/bin/ilm-update-hostname

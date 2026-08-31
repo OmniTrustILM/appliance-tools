@@ -9,28 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-
+      # The submodules are deliberately not checked out: the check reads
+      # .gitmodules, which is a tracked file, and looks the pinned commits up
+      # itself. Cloning them first only made the job die before it had
+      # anything to say.
       - name: Verify submodules
-        run: |
-          # This checks for unknown repository URL. It asumes that base_GIT_URL
-          # is also fine even when not from official
-          # https://github.com/OmniTrustILM/ to be able test package in forks.
-          #
-
-          base_GIT_URL=`git config --get remote.origin.url | sed 's,\(.*\/\).*,\1,'`
-
-          if git submodule foreach -q 'echo $(git config --get remote.origin.url)' |\
-              grep -v "$base_GIT_URL" |\
-              grep -v 'https://github.com/OmniTrustILM/'
-          then
-              echo "
-          Unknown submodule URL, see above. Please check and add it into
-          exclude grep if is that desired."
-              exit 1
-          else
-              echo "Only known submodule URL found. This is right."
-          fi
+        env:
+          # A pull request runs in the context of the repository it targets,
+          # so this is OmniTrustILM for a request into the official repository
+          # and the fork's owner for a push to a fork.
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: ./.github/verify-submodules.sh

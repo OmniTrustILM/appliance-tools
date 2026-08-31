@@ -1,3 +1,20 @@
+# Configuration for Ansible ILM installation.
+#
+# The mail server the email notification provider sends notifications
+# through, the Mail screen of ilm-tui writes it. It is only used when
+# emailProvider is enabled in ilm.yml, and then it has to be right: the
+# provider connects to this server and authenticates while it starts, so
+# settings it refuses leave the pod crashing instead of turning a feature
+# off. The playbook therefore contacts the server before it installs
+# anything, and refuses to install with the example below.
+#
+# Check the settings by hand with:
+#
+#   ilm-smtp-check --host mail.example.com --port 587 --user username -v
+#
+# smtp_tls asks for STARTTLS, which is used when the server offers it - it
+# is not a requirement, and it is not SMTPS on port 465.
+---
 smtp_host: mail.example.com
 smtp_port: 25
 # smtp_tls: true

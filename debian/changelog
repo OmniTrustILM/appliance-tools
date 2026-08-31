@@ -1,3 +1,28 @@
+ilm-appliance-tools (2.19.0) stable; urgency=medium
+  * Updated RKE2 role to support custom RKE versions & defaulted to v1.36.2+rke2r1
+  * Added support for Traefik ingress class and local plugin for client certificate handling
+  * Dropped installing standalone ingress-nginx
+  * Ansible Roles cleanup and refactoring
+  * Raised ILM version to 2.19.0
+  * Added externalAuthorityProvider, otpkiConnector and timestampFormattingConnector,
+    shipped switched off as they need the private image repository
+  * Added CBOM repository, installed as a release of its own, its data kept in
+    /var/lib/ilm/cbom-repo so that it survives a reinstall of RKE2
+  * Single list of the components coming from the private repository, marked
+    with an asterisk in ilm-tui and refused by the playbook without credentials
+  * Added wait-for-database init container to every component using the database,
+    they no longer restart while pg-bouncer starts
+  * Verify the mail server before installing emailProvider, in ilm-tui and in the
+    playbook, with the new ilm-smtp-check command
+
+ -- Jan Tomášek <jan.tomasek@omitrust.com>  Sun, 30 Aug 2026 11:00:00 +0200
+
+ilm-appliance-tools (2.17.0-2) stable; urgency=medium
+  * Fix unnecessary request for ilm password
+  * Enforce absolute paths for ingressTLS certificate and private key in ilm-tui
+
+ -- Jan Tomášek <jan.tomasek@3key.company>  Tue, 29 Apr 2026 13:00:00 +0200
+
 ilm-appliance-tools (2.17.0-1) stable; urgency=medium
   * Increased input field length limits in ilm-tui (SMTP config
   * Raised ILM version to 2.17.0
