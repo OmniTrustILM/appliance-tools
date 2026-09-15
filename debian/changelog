@@ -1,3 +1,11 @@
+ilm-appliance-tools (2.19.0-1) stable; urgency=medium
+  * Cast helm_major to int in the conditions of the helm role: set_fact
+    stores it as a string on ansible-core < 2.19, so "helm_major >= 4"
+    failed on Debian bookworm (ansible-core 2.14) when upgrading an
+    appliance 2.16.0 in place
+
+ -- Jan Tomášek <jan.tomasek@omitrust.com>  Mon, 14 Sep 2026 18:50:00 +0200
+
 ilm-appliance-tools (2.19.0) stable; urgency=medium
   * Updated RKE2 role to support custom RKE versions & defaulted to v1.36.2+rke2r1
   * Added support for Traefik ingress class and local plugin for client certificate handling
