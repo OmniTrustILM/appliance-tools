@@ -85,14 +85,19 @@ GitHub actions.
 
 ### Secrets
 
-`DEB_REPO_KEY` - private key of the user on `DEB_REPO_HOST`
+`DEB_REPO_PUBLISH_TOKEN` - bearer token for the publish endpoint at
+`https://<DEB_REPO_HOST>/publish` (the `deb-otilm` application on the lab10
+cluster, see `kustomized-helmchart/apps/deb-otilm`). The same value lives in
+the `deb-otilm-publish-token` Kubernetes secret there. The workflow POSTs the
+built `.deb` with `dist=<branch>`; the server maps `main`/`master` to the
+`stable` distribution and everything else to `develop`, then includes and
+signs the package with reprepro.
 
 ### Repository Variables
 
-`DEB_REPO_HOST` - hostname of host where repository is installed
-
-`DEB_REPO_USER` - username of user used for publishing Debian package on `DEB_REPO_HOST`
-
-`DEB_REPO_DIRECTORY` - directory where to put a new package (`/var/www/deb.czertainly.com/incoming`)
-
-`DEB_REPO_MANAGER` - script used for managing debian repositoy (`/var/www/deb.czertainly.com/manage-repository`)
+`DEB_REPO_HOST` - hostname of the repository publish endpoint. Required, no
+default (the publish step refuses to run without it): `deb.otilm.com` on the
+org repository; forks set their test instance
+(e.g. `semik-deb-otilm.lab.otilm.com`, see
+`kustomized-helmchart/apps/semik-deb-otilm`) together with that instance's
+`DEB_REPO_PUBLISH_TOKEN`.
