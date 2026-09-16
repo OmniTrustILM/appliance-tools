@@ -1,9 +1,7 @@
 ---
 on:
   push:
-    # deb-otilm is a fork-side testing branch (publishes to the test repo
-    # via DEB_REPO_HOST) - drop it from this list when PRing to the org repo
-    branches: [main, master, develop, deb-otilm]
+    branches: [main, master, develop]
   # Manual run from any branch (Actions -> Run workflow) - used on forks to
   # test feature branches; the publisher maps them to the develop dist.
   workflow_dispatch:
